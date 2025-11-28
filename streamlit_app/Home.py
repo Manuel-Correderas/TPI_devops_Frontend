@@ -201,18 +201,49 @@ def load_products_from_backend_or_csv(q: str | None) -> pd.DataFrame:
         )
 
 
+
 # =========================
-# TOPBAR (incluye CARRITO)
+# TOPBAR (incluye CARRITO + LOGOUT)
 # =========================
 st.markdown('<div class="topbar">', unsafe_allow_html=True)
-c1, c2, c3 = st.columns([2, 4, 1])
+c1, c2, c3 = st.columns([2, 4, 2])
+
 with c1:
     st.markdown('<div class="brand">🛍️ Ecom MKT Lab</div>', unsafe_allow_html=True)
+
 with c2:
     q = st.text_input("Buscar productos…", label_visibility="collapsed", key="q")
+
 with c3:
-    if st.button("🛒 Carrito"):
-        st.switch_page("pages/4_Mi_Carrito.py")
+    col_cart, col_logout = st.columns([1, 1])
+
+    with col_cart:
+        if st.button("🛒 Carrito", key=K("btn_cart")):
+            st.switch_page("pages/4_Mi_Carrito.py")
+
+    with col_logout:
+        if "auth_token" in st.session_state:
+            if st.button("🚪 Logout", key=K("btn_logout")):
+                # limpiar sesión
+                for k in [
+                    "auth_token", "auth_user_id", "auth_email", "auth_roles",
+                    "roles", "is_authenticated", "user", "user_id", "user_name",
+                    "auth_user_name", "auth_user_email", "seller_view",
+                    "premium", "dni_bloqueado", "is_admin",
+                ]:
+                    st.session_state.pop(k, None)
+
+                st.success("Sesión cerrada correctamente.")
+                # recargar Home "limpio"
+                if hasattr(st, "rerun"):
+                    st.rerun()
+                else:
+                    st.experimental_rerun()
+        else:
+            # si no está logueado, mostramos acceso a Login
+            if st.button("🔐 Login", key=K("btn_login")):
+                st.switch_page("pages/0_Login.py")
+
 st.markdown("</div>", unsafe_allow_html=True)
 
 
