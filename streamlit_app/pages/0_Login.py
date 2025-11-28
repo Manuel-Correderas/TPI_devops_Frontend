@@ -2,13 +2,17 @@
 import os
 import requests
 import streamlit as st
-from auth_helpers import get_backend_url, set_auth_session  # <-- NUEVO
+from auth_helpers import get_backend_url, set_auth_session
 
 st.set_page_config(page_title="Login - Ecom MKT Lab", layout="centered")
 
 BACKEND_URL = get_backend_url()
 PAGE_NS = "login_v1"
 def K(s: str) -> str: return f"{PAGE_NS}:{s}"
+
+# 👇 Si ya está logueado, lo mando a Home
+if "auth_token" in st.session_state:
+    st.switch_page("Home.py")
 
 # ---------- Estilos ----------
 st.markdown("""
@@ -41,8 +45,7 @@ def do_login(email: str, password: str):
         )
         if r.status_code == 200:
             data = r.json()
-            # 🔐 unificamos acá
-            set_auth_session(data)
+            set_auth_session(data)   # 🔐 guarda token y user en session_state
             return True, None
         elif r.status_code == 401:
             return False, "Credenciales inválidas"
@@ -64,6 +67,9 @@ with col:
 
     st.markdown('<div class="login-card">', unsafe_allow_html=True)
     st.markdown("### Iniciar sesión")
+
+    # 👇 DEBUG TEMPORAL
+    st.write("DEBUG SESSION LOGIN:", st.session_state)
 
     email = st.text_input("Email", placeholder="tu@correo.com", key=K("email"))
     password = st.text_input("Contraseña", type="password", placeholder="••••••••", key=K("pwd"))
@@ -87,7 +93,6 @@ with col:
             st.switch_page("Home.py")
 
     with c3:
-        # Eliminado el botón REGISTRARSE para no depender de 0b
         st.write("")
 
     st.write("")

@@ -10,17 +10,18 @@ st.set_page_config(page_title="Panel del Vendedor", page_icon="🏪", layout="ce
 
 from auth_helpers import get_backend_url, auth_headers, require_login
 
-
 BACKEND_URL = get_backend_url()
 PAGE_NS = "seller_panel_v1"
 def K(s: str) -> str:
     return f"{PAGE_NS}:{s}"
 
-
 # =====================================================
 # 🔐 LOGIN + ROLES
 # =====================================================
 require_login()
+
+# 👇 DEBUG TEMPORAL (lo podés sacar después)
+st.write("DEBUG SESSION EN VENDEDOR:", st.session_state)
 
 roles = (
     st.session_state.get("auth_roles")
@@ -50,7 +51,10 @@ SELLER_NAME = (
     or "Vendedor"
 )
 
-
+if not SELLER_ID:
+    st.error("No se pudo determinar el ID del vendedor desde la sesión.")
+    st.page_link("pages/0_Login.py", label="Volver a login", icon="🔐")
+    st.stop()
 # =====================================================
 # 🎨 ESTILOS (simple premium)
 # =====================================================
