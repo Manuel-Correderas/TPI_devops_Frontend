@@ -11,12 +11,29 @@ load_dotenv()
 def get_backend_url() -> str:
     """
     Devuelve la URL base del backend.
-    - Usa BACKEND_URL del entorno si existe (por ej. la de Render)
-    - Si no, cae a localhost para desarrollo.
+    Prioridad:
+    1) st.secrets["BACKEND_URL"]  (Streamlit Cloud)
+    2) variable de entorno BACKEND_URL (local .env)
+    3) localhost:8000 para desarrollo
     """
-    url = os.getenv("BACKEND_URL")
+    url = None
+
+    # 1) Secrets de Streamlit Cloud
+    try:
+        if "BACKEND_URL" in st.secrets:
+            url = st.secrets["BACKEND_URL"]
+    except Exception:
+        # st.secrets puede no existir en algunos contextos
+        pass
+
+    # 2) .env / variables de entorno
+    if not url:
+        url = os.getenv("BACKEND_URL")
+
+    # 3) Fallback local
     if url:
-        return url.rstrip("/")  # sacamos / final si lo hubiera
+        return str(url).rstrip("/")
+
     return "http://127.0.0.1:8000"
 
 
@@ -138,7 +155,7 @@ def require_login():
     if "auth_token" not in st.session_state:
         st.warning("Tenés que iniciar sesión.")
         # ⚠️ AJUSTÁ el nombre del archivo si tu login se llama distinto
-        st.page_link("pages/0_🔐_Login.py", label="Ir a Login", icon="🔐")
+        st.page_link("pages/0_Login.py", label="Ir a Login", icon="🔐")
         st.stop()
 
 
