@@ -120,8 +120,12 @@ def _build_payload(
 
         "roles": roles,
         "role": roles[0],
+
+        # 👇 NUEVO: que el backend reciba premium
+        "premium": 0,   # 0 = free, 1 = premium
     }
     return payload
+
 
 
 def _post_user(payload):
